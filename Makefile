@@ -1,12 +1,15 @@
-CFLAGS	      = -Ae -O -I/usr/local/include
+HMSHOST=rtfm.sr.hp.com
+HMSDIR=/MFeetools/stripcalc
 
-LDFLAGS	      =-L /usr/local/lib/p2c 
+CFLAGS = -Ae -O -I/usr/local/include
 
-MAKEFILE      = Makefile
+LDFLAGS =-L /usr/local/lib/p2c 
 
-SHELL	      = /bin/sh
+MAKEFILE = Makefile
 
-TARGETS	   =	stripcalc msctl msctl2 linestub cheby bpf helical_c helical_s helical_filter interdig
+SHELL = /bin/sh
+
+TARGETS	= stripcalc msctl msctl2 linestub cheby bpf helical_c helical_s helical_filter interdig
 
 all:		$(TARGETS)
 
@@ -42,6 +45,16 @@ helical_s: helical_s.c
 
 helical_filter: helical_filter.c
 	cc  $(CFLAGS) -o helical_filter helical_filter.c -lm
+
+update:	fmrc
+	-fupdate -RM
+
+fmrc:
+	@echo \#Update this with \'make fmrc\' > fmrc
+	@echo \#set your FMRC environment var to \'./fmrc\' >> fmrc
+	@echo usehost $(HMSHOST) $(HMSDIR) >> fmrc
+	@echo mapdir `/bin/pwd` $(HMSDIR) >> fmrc
+
 
 tags:;		@etags *.c *.h
 
