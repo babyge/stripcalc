@@ -6,6 +6,9 @@
 $Header$
 
 $Log$
+Revision 1.3  2000/08/29 03:40:48  mikef
+Fix ill-conditioned output for Offset stripline with zero plate-up thickness.
+
 Revision 1.2  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -357,7 +360,7 @@ Char *argv[];
 	get_longreal("[3] Center conductor width:", &w);
 	if (calculation == forward) {
 	  OSTPLN_Z(b, Er, w, height, &Zo, &Eeff);
-	  printf("Zo=%3.2f", Zo );
+	  printf("Zo=%3.2f\n", Zo );
 	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Er));
 	} else {
 	  target_parameter = 0;

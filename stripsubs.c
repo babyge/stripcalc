@@ -4,6 +4,9 @@
 $Header$
 
 $Log$
+Revision 1.3  2000/08/29 03:40:48  mikef
+Fix ill-conditioned output for Offset stripline with zero plate-up thickness.
+
 Revision 1.2  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -384,6 +387,7 @@ double func(x)
      double x;
 {
    double ret;
+   if (x <= 0) x=1.0e-6; /*If we don't do this, the log is ill-conditioned */
    ret = (1.0 - 2.0*x)*(((1.0-x)*log(1.0-x))-x*log(x));
    return(ret);
 }
@@ -412,7 +416,7 @@ Void OSTPLN_Z (b, Er, w, h, Zo, Eeff)
    } else {
       x=w/t;
    }
-   d0=w*(0.5008 + 1.0235*x + 1.0230*x*x + 1.1564*x*x*x + 0.4749*x*x*x*x);
+   d0=w*(0.5008 + 1.0235*x - 1.0230*x*x + 1.1564*x*x*x - 0.4749*x*x*x*x);
    cl=((b-s)/2.0);
    A=sin(Pi*cl/b)*coth(Pi*d0/(2*b));
 
