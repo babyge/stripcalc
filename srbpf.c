@@ -14,6 +14,21 @@ Y1  C01         C12          C2N        CN,N+1    YN
 $Header$
 
 $Log$
+Revision 1.3  2003/04/18 21:31:57  mikef
+*** empty log message ***
+
+Revision 1.6  2002/12/06 01:17:47  mikef
+*** empty log message ***
+
+Revision 1.5  2002/12/05 23:41:13  mikef
+*** empty log message ***
+
+Revision 1.4  2002/12/05 22:49:00  mikef
+*** empty log message ***
+
+Revision 1.3  2002/12/05 22:17:58  mikef
+Remove p2c cruft
+
 Revision 1.2  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -24,58 +39,21 @@ Add header and log keywords to all files
 
 */
 
-#include <p2c/p2c.h>
 #include <stdio.h>
 #ifndef MATHLIB_H
 #include "mathlib.h"
 #endif
 
+/*#define is_odd(x) (((int)x % 2)==1)*/
+#define is_odd(x) (GSL_IS_ODD((int) x))
 
-#define v_light         2.99792458e+8   /*m/s*/
-#define Eo              8.854187818e-12   /*F/m*/
-
-#define isodd(x) (((int)((n)/2))*2 != n)
 #define TRUE (1)
 #define FALSE (0)
 
 
-/***********************************************************************/
-Static Void get_str(Prompt, ret)
-Char *Prompt, *ret;
-{
-  Char *TEMP;
+#include "get_input.h"
 
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, '\n');
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-/***********************************************************************/
-Static Void get_double(Prompt, ret)
-Char *Prompt;
-double *ret;
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
-/***********************************************************************/
-Static Void get_int(Prompt, ret)
-Char *Prompt;
-double *ret;
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%ld%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
-
-
-main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 
@@ -83,10 +61,10 @@ char *argv[];
    int R;
    double rd, at, rl, ap, gamma, beta, delta, a[50], b[50], g[50], n;
    double ga, gb, f1, f2, f0, bf, l;
-   double w0, cr, c[50][50], j[50][50], cein, ceout;
+   double w0, cr, c[50][50], cein, ceout;
    double zin, zout;
-   double eps, am, ah, wh;    
-   boolean cheby = FALSE;
+   double eps, am, ah, wh, wf;    
+   unsigned char cheby = FALSE;
    
    printf("Coupled (Series) Resonator BPF calculator.\n");
    printf("Copyright (C) 1997 M. Ferrara\n");
@@ -115,11 +93,11 @@ char *argv[];
       ap=power(10.0,am/10.0);
       eps=sqrt(ap-1.0);
       beta=2.0*asinh(1/eps);
-      ah=isodd(n) ? 2.0 : 2.0*ap;
+      ah=(is_odd(n)) ? 2.0 : 2.0*ap;
       wh=cosh((1/n)*acosh(sqrt(ah-1)/eps)); /*3dB bandwidth*/
     }
    if (cheby) {
-      at = isodd(n) ? 4.0*rl/((rl+1)*(rl+1)) : 4.0*rl*ap/((rl+1)*(rl+1));
+      at = (is_odd(n)) ? 4.0*rl/((rl+1)*(rl+1)) : 4.0*rl*ap/((rl+1)*(rl+1));
     }
    else at = 4.0*rl/((rl+1)*(rl+1));
 

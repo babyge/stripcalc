@@ -1,7 +1,25 @@
 #$Header$
 #
 #$Log$
-#Revision 1.6  2002/08/17 19:31:13  mikef
+#Revision 1.7  2003/04/18 21:31:56  mikef
+#*** empty log message ***
+#
+#Revision 1.13  2002/12/06 00:17:00  mikef
+#Convert to gsl
+#
+#Revision 1.12  2002/12/05 23:03:03  mikef
+#*** empty log message ***
+#
+#Revision 1.11  2002/12/05 22:17:57  mikef
+#Remove p2c cruft
+#
+#Revision 1.10  2002/12/05 01:21:12  mikef
+#*** empty log message ***
+#
+#Revision 1.9  2002/12/04 23:41:30  mikef
+#*** empty log message ***
+#
+#Revision 1.8  2002/09/12 03:19:27  mikef
 #*** empty log message ***
 #
 #Revision 1.9  2002/07/08 20:17:06  mikef
@@ -34,61 +52,27 @@
 
 CC = gcc
 
-CFLAGS = -g
+CFLAGS = -g -Wall
 
 #LDFLAGS =-L /usr/local/lib/p2c 
+
+LIBS = stripsubs.o mathlib.o -lgsl -lgslcblas -lm -lreadline
 
 MAKEFILE = Makefile
 
 SHELL = /bin/sh
 
-TARGETS	= stripcalc msctl msctl2 linestub cheby bpf helical_c helical_s helical_filter interdig slbrctl slectl
+TARGETS	= stripcalc msctl msctl2 linestub cheby bpf helical_c helical_s helical_filter interdig slbrctl slectl srbpf
 
 all:		$(TARGETS)
 
-stripcalc :     stripcalc.c stripsubs.o mathlib.o myprintf.o
-		$(CC) $(CFLAGS) -o stripcalc stripcalc.c stripsubs.o mathlib.o $(LDFLAGS) -lp2c myprintf.o -lc -lm 
-
-msctl2:	msctl2.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o msctl2 msctl2.c mathlib.o myprintf.o -lm
-
-msctl:	msctl.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o msctl msctl.c mathlib.o myprintf.o -lm
-
-slbrctl: slbrctl.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o slbrctl slbrctl.c mathlib.o myprintf.o -lm
-
-slectl: slectl.c stripsubs.o mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o slectl slectl.c stripsubs.o mathlib.o myprintf.o -lm
-
-interdig:	interdig.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o interdig interdig.c mathlib.o myprintf.o -lm
-
-linestub: linestub.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o linestub linestub.c mathlib.o myprintf.o -lm
-
-cheby: cheby.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o cheby cheby.c mathlib.o myprintf.o -lm
-
-bpf: bpf.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o bpf bpf.c mathlib.o myprintf.o -lm
-
-srbpf: srbpf.c mathlib.o myprintf.o
-	$(CC) $(CFLAGS) -o srbpf srbpf.c mathlib.o myprintf.o -lm
-
-helical_c: helical_c.c  myprintf.o 
-	$(CC)  $(CFLAGS) -o helical_c helical_c.c myprintf.o -lm
-
-helical_s: helical_s.c myprintf.o
-	$(CC)  $(CFLAGS) -o helical_s helical_s.c myprintf.o -lm
-
-helical_filter: helical_filter.c myprintf.o
-	$(CC)  $(CFLAGS) -o helical_filter helical_filter.c myprintf.o -lm
+%:	%.c stripsubs.o mathlib.o
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) ${LIBS}
 
 update:	
 	cvs update -A
 
-clean:;		@rm -f *.o core *~ \#*
+clean:;		@rm -f *.o core *~ \#* 
 
 clobber:;	@rm -f *.o *~ \#* core tags $(TARGETS)
 

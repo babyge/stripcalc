@@ -4,6 +4,18 @@
 $Header$
 
 $Log$
+Revision 1.3  2003/04/18 21:31:56  mikef
+*** empty log message ***
+
+Revision 1.5  2002/12/05 23:41:13  mikef
+*** empty log message ***
+
+Revision 1.4  2002/12/05 22:49:00  mikef
+*** empty log message ***
+
+Revision 1.3  2002/12/05 22:17:58  mikef
+Remove p2c cruft
+
 Revision 1.2  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -12,43 +24,16 @@ Add header and log keywords to all files
 
 */
 
-#include <p2c/p2c.h>
 #include <stdio.h>
 #ifndef MATHLIB_H
 #include "mathlib.h"
 #endif
 
 
-#define v_light         2.99792458e+8   /*m/s*/
-#define Eo              8.854187818e-12   /*F/m*/
-
 double Zoo,Zoe,Z0,c,whso,whse,P,er,r,H,F,G;
 double w,wh,sh,eeff,ht;
 
-/***********************************************************************/
-Static Void get_str(Prompt, ret)
-Char *Prompt, *ret;
-{
-  Char *TEMP;
-
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, '\n');
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-/***********************************************************************/
-Static Void get_double(Prompt, ret)
-Char *Prompt;
-double *ret;
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
+#include "get_input.h"
 
 #define JMAX 4000
 
@@ -86,7 +71,7 @@ double numer(gparam)
  even and odd mode velocities.  (MTT-27 no.7 July 1979 pp(700-705)
 ************/
 
-msctl_er(w,s,h,er,ere,ero)
+void msctl_er(w,s,h,er,ere,ero)
 double w,s,h,er,*ere,*ero;
 
 {
@@ -135,7 +120,7 @@ return;
 /*************
  main: entry point
 **************/
-main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 

@@ -7,6 +7,15 @@
 $Header$
 
 $Log$
+Revision 1.3  2003/04/18 21:31:56  mikef
+*** empty log message ***
+
+Revision 1.4  2002/12/05 23:41:13  mikef
+*** empty log message ***
+
+Revision 1.3  2002/12/05 22:17:58  mikef
+Remove p2c cruft
+
 Revision 1.2  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -21,6 +30,7 @@ Add header and log keywords to all files
 #include <stdio.h>
 #include <math.h>
 
+
 double wire_guage[40] = {
 8.252, 6.950, 6.185, 5.508, 4.905, 4.358, 3.890, 3.465, 3.085, 2.747,
 2.446, 2.177, 1.940, 1.730, 1.540, 1.370, 1.220, 1.085, .9660, .8625,
@@ -28,34 +38,7 @@ double wire_guage[40] = {
 .2400, .2145, .1915, .1700, .1510, .1345, .1205, .1080, .09545, .08380  
 };
 
-static void get_str(char *Prompt, char *ret)
-{
-  char *TEMP;
-
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, "\n");
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-/***********************************************************************/
-static void get_double(char *Prompt, double *ret)
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
-/***********************************************************************/
-static void get_int(char *Prompt, long *ret)
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%ld%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
+#include "get_input.h"
 
 int guage(double g)
 {
@@ -69,7 +52,7 @@ int guage(double g)
 
 main(int argc, char **argv) 
 {
-   double S,Q,F,Turns,Pitch,Zed,D,D_,H,G,Er,Df;
+   double S,Q,F,Turns,Pitch,Zed,D_,H,G,Er,Df;
    char yn[255];
    
    Er=1.0;

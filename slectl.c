@@ -4,7 +4,19 @@
 $Header$
 
 $Log$
-Revision 1.1  2002/08/17 19:31:37  mikef
+Revision 1.2  2003/04/18 21:31:57  mikef
+*** empty log message ***
+
+Revision 1.6  2002/12/05 23:41:13  mikef
+*** empty log message ***
+
+Revision 1.5  2002/12/05 22:49:00  mikef
+*** empty log message ***
+
+Revision 1.4  2002/12/05 22:17:58  mikef
+Remove p2c cruft
+
+Revision 1.3  2002/09/12 03:19:27  mikef
 *** empty log message ***
 
 Revision 1.4  2002/07/08 20:17:06  mikef
@@ -21,43 +33,22 @@ Initial import
 
 
 */
-#include <p2c/p2c.h>
 #include <stdio.h>
 #ifndef MATHLIB_H
 #include "mathlib.h"
 #endif
 
+#include "stripsubs.h"
 
-#define v_light         2.99792458e+8   /*m/s*/
-#define Eo              8.854187818e-12   /*F/m*/
-#define Pi              3.14159265358979232646e+00
-#define No              (120*Pi) /* ohms */
 
 double Cf0(double er);
 double Cf(double er, double t, double b);
+void zeroTZ(double er, double b, double w, double s, double *Zoo, double *Zoe);
+void calcZ(double er, double b, double w, double s, double t, double *Zoo, double *Zoe);
 
-/***********************************************************************/
-Static Void get_str(char *Prompt, char *ret)
-{
-  Char *TEMP;
+#include "get_input.h"
 
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, '\n');
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-/***********************************************************************/
-Static Void get_double(char *Prompt, double *ret)
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
-main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 {
@@ -96,7 +87,7 @@ char *argv[];
 }
 
 /*Calculate Zoe and Zoo for the zero thickness case*/
-zeroTZ(double er, double b, double w, double s, double *Zoo, double *Zoe) 
+void zeroTZ(double er, double b, double w, double s, double *Zoo, double *Zoe) 
 {
    double ke,keprime, ko,koprime;
 
@@ -112,7 +103,7 @@ zeroTZ(double er, double b, double w, double s, double *Zoo, double *Zoe)
 		       
 
 
-calcZ(double er, double b, double w, double s, double t, double *Zoo, double *Zoe) 
+void calcZ(double er, double b, double w, double s, double t, double *Zoo, double *Zoe) 
 {
    double Zowt, Zow, Zooz, Zoez, Eeff;
    FTSTPLN_Z(b,er,w,t,&Zowt,&Eeff);

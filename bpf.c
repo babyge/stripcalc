@@ -4,6 +4,18 @@
 $Header$
 
 $Log$
+Revision 1.3  2003/04/18 21:31:56  mikef
+*** empty log message ***
+
+Revision 1.5  2002/12/05 23:41:13  mikef
+*** empty log message ***
+
+Revision 1.4  2002/12/05 22:49:00  mikef
+*** empty log message ***
+
+Revision 1.3  2002/12/05 01:21:12  mikef
+*** empty log message ***
+
 Revision 1.2  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -16,15 +28,14 @@ Add header and log keywords to all files
 
 */
 
-#include <p2c/p2c.h>
+
 #include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #ifndef MATHLIB_H
 #include "mathlib.h"
 #endif
-
-
-#define v_light         2.99792458e+8   /*m/s*/
-#define Eo              8.854187818e-12   /*F/m*/
 
 #define isodd(x) (((int)((n)/2))*2 != n)
 
@@ -35,43 +46,9 @@ Add header and log keywords to all files
 #define FALSE (0)
 #endif
 
-/***********************************************************************/
-Static Void get_str(Prompt, ret)
-Char *Prompt, *ret;
-{
-  Char *TEMP;
+#include "get_input.h"
 
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, '\n');
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-/***********************************************************************/
-Static Void get_double(Prompt, ret)
-Char *Prompt;
-double *ret;
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
-/***********************************************************************/
-Static Void get_int(Prompt, ret)
-Char *Prompt;
-double *ret;
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%ld%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
-
-
-main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 
@@ -82,7 +59,7 @@ char *argv[];
    double w0, cr, c[50][50], j[50][50], cein, ceout;
    double zin, zout;
    double eps, am, ah, wh;    
-   boolean cheby = FALSE;
+   unsigned char cheby = FALSE;
    
    printf("Coupled Resonator BPF calculator.\n");
    printf("Copyright (C) 1997 M. Ferrara\n");

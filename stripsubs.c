@@ -1,51 +1,14 @@
-/* Output from p2c, the Pascal-to-C translator */
-/* From input file "stripsubs.p" */
 /*
 $Header$
 
-$Log$
-Revision 1.4  2002/08/17 19:31:13  mikef
-*** empty log message ***
-
-Revision 1.6  2002/07/08 01:13:46  mikef
-Add stripline thickness
-
-Revision 1.5  2002/07/08 01:06:49  mikef
-Add slectl with finite strip thickness
-
-Revision 1.4  2002/07/07 23:16:37  mikef
-Incremental checkin
-
-Revision 1.3  2000/08/29 03:40:48  mikef
-Fix ill-conditioned output for Offset stripline with zero plate-up thickness.
-
-Revision 1.2  2000/06/21 18:05:48  mikef
-*** empty log message ***
-
-Revision 1.9  2000/06/16 20:39:47  mikef
-Better offset stripline calc.
-
-Revision 1.8  2000/02/24 00:00:09  mikef
-compilation cleanup
-
-Revision 1.7  1999/12/13 22:51:13  mikef
-Add header and log keywords to all files
-
 */
-/*generate symbol tables*/
-
-#include <p2c/p2c.h>
 
 #define STRIPSUBS_G
 #include "stripsubs.h"
 
 
 /***********************************************************************/
-Void Strip_Z(Strip_type, dimension, finite, result)
-linetype Strip_type;
-double *dimension;
-boolean finite;
-double *result;
+void Strip_Z(linetype Strip_type, double *dimension, unsigned char finite, double *result)
 {
   double Er;   /*dimension[1]*/
   double h;   /*dimension[2]*/
@@ -130,10 +93,8 @@ double *result;
 /**  gplane_width = Ground plane width                                 **/
 /**        finite = If FALSE, ignore w_gplane, assume infinity         **/
 /************************************************************************/
-Void CPW_Z(h, Er, w_strip, d_to_gplanes, gplane_width, finite, Zo, Eeff)
-double h, Er, w_strip, d_to_gplanes, gplane_width;
-boolean finite;
-double *Zo, *Eeff;
+void CPW_Z(double h, double Er, double w_strip, double d_to_gplanes, 
+	   double gplane_width, unsigned char finite, double *Zo, double *Eeff)
 {
   double a, b, d, elip_ratio1, elip_ratio2, k1, k1prime, k2, k2prime, temp1,
 	 temp2, temp3, temp4, TEMP;
@@ -173,8 +134,7 @@ double *Zo, *Eeff;
 /**   d1          Distance to ground strip                          **/
 /**   d2          Distance to ground strip                          **/
 /*********************************************************************/
-Void ACPW_Z(h, Er, b, d1, d2, Zo, Eeff)
-double h, Er, b, d1, d2, *Zo, *Eeff;
+void ACPW_Z(double h, double Er, double b, double d1, double d2, double *Zo, double *Eeff)
 {
   double k1, k1p;   /*k1 calculated with alphap*/
   double k1m;   /*k1 calculated with alpham*/
@@ -238,8 +198,7 @@ double h, Er, b, d1, d2, *Zo, *Eeff;
 /* *                     Zo Impedance of the line                 (output) * */
 /* *                     Eeff Effective epsilon of the line       (output) * */
 /* ************************************************************************* */
-Void GCPW_Z(h, Er, w, d, Zo, Eeff)
-double h, Er, w, d, *Zo, *Eeff;
+void GCPW_Z(double h, double Er, double w, double d, double *Zo, double *Eeff)
 {
   double k, k1, a, b, elip_ratio, elip_ratio1, temp1;
 
@@ -260,8 +219,7 @@ double h, Er, w, d, *Zo, *Eeff;
 /**  Effective dielectric constant from physical dimensions           **/
 /**                                                                   **/
 /***********************************************************************/
-Void MSTP_Z(h, Er, w, Zo, Eeff)
-double h, Er, w, *Zo, *Eeff;
+void MSTP_Z(double h, double Er, double w, double *Zo, double *Eeff)
 {
   double u, a, b, c, d1, func_u, Zo_air, TEMP;
 
@@ -279,8 +237,7 @@ double h, Er, w, *Zo, *Eeff;
   *Zo = Zo_air / sqrt(*Eeff);
 }  /*procedure*/
 #else
-Void MSTP_Z(h, Er, w, t, Zo, Eeff)
-double h, Er, w, *Zo, t, *Eeff;
+void MSTP_Z(double h, double Er, double w, double t, double *Zo, double *Eeff)
 {
    double tmp1,tmp2;
    double dwt,dwp;
@@ -306,8 +263,7 @@ double h, Er, w, *Zo, t, *Eeff;
 }
 #endif
 
-Void BMSTP_Z(h, Er, w, b, t, Zo, Eeff)
-double h, Er, w, b, t, *Zo, *Eeff;
+void BMSTP_Z(double h, double Er, double w, double b, double t, double *Zo, double *Eeff)
 {
 double Eburied, Zomicrostrip, Emicrostrip;
 MSTP_Z(h, Er, w, t, &Zomicrostrip, &Emicrostrip);
@@ -327,9 +283,7 @@ Eburied=Emicrostrip*exp(-2.0*b/h) + Er*(1.0 - exp(-2.0*b/h));
 /* *      Artech House 1981, pp.65-67.                                 * */
 /* *  DIMENSIONS MUST BE IN MICRONS !!!!!                              * */
 /* ********************************************************************* */
-Void SLT_Z(h, Er, w, f, Zo, Eeff, Error_ret)
-double h, Er, w, f, *Zo, *Eeff;
-int *Error_ret;
+void SLT_Z(double h, double Er, double w, double f, double *Zo, double *Eeff, int *Error_ret)
 {
   double temp1, temp2, wh, lo, lamr, TEMP;
 
@@ -365,7 +319,7 @@ int *Error_ret;
 
 /*Zero strip thickness stripline*/
 /*Transmission Line Design Handbook, Wadell, pp 125-126 */
-Void STPLN_Z(b, Er, w, Zo, Eeff)
+void STPLN_Z(b, Er, w, Zo, Eeff)
      double b, Er, w, *Zo, *Eeff;
 {
    double k,kprime;
@@ -379,8 +333,7 @@ Void STPLN_Z(b, Er, w, Zo, Eeff)
 
 /*Finite strip thickness stripline*/
 /*Transmission Line Design Handbook, Wadell, pp 126,127*/
-Void FTSTPLN_Z(b, Er, w, t, Zo, Eeff)
-     double b, Er, w, t, *Zo, *Eeff;
+void FTSTPLN_Z(double b,double Er,double w,double t,double *Zo,double *Eeff)
 {
    double m,dwt,wprime;
    double tmp;
@@ -397,8 +350,7 @@ Void FTSTPLN_Z(b, Er, w, t, Zo, Eeff)
 
 #ifdef OLD_OSTPLN
 
-Void OSTPLN_Z (b, Er, w, h, Zo, Eeff)
-     double b,Er,w,h,*Zo,*Eeff;
+void OSTPLN_Z (double b, double Er, double w, double h, double *Zo, double *Eeff)
 {
    double Zoair,dZoair,h1,h2;
    double Zoh1, Zoh2, Zoctr;
@@ -428,8 +380,7 @@ Void OSTPLN_Z (b, Er, w, h, Zo, Eeff)
 
 #else
 
-double func(x) 
-     double x;
+double func(double x) 
 {
    double ret;
    if (x <= 0) x=1.0e-6; /*If we don't do this, the log is ill-conditioned */
@@ -437,11 +388,9 @@ double func(x)
    return(ret);
 }
 
-Void OSTPLN_Z (b, Er, w, h, t, Zo, Eeff)
-     double b,Er,w,h,t,*Zo,*Eeff;
+void OSTPLN_Z (double b, double Er, double w, double h, double t, double *Zo, double *Eeff)
 {
-   double Zoair,dZoair,h1,h2;
-   double Zoh1, Zoh2, Zoctr;
+   double h1,h2;
    double s = 0;
    double x,A,d0,cl;
    double gam,beta,k,kp,wbeff,Cfp;
@@ -482,10 +431,3 @@ Void OSTPLN_Z (b, Er, w, h, t, Zo, Eeff)
 }
 
 #endif
-
-/*module*/
-
-
-
-
-/* End. */

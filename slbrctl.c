@@ -4,6 +4,18 @@
 $Header$
 
 $Log$
+Revision 1.2  2003/04/18 21:31:57  mikef
+*** empty log message ***
+
+Revision 1.4  2002/12/05 23:41:13  mikef
+*** empty log message ***
+
+Revision 1.3  2002/12/05 22:49:00  mikef
+*** empty log message ***
+
+Revision 1.2  2002/12/05 22:17:58  mikef
+Remove p2c cruft
+
 Revision 1.1  2000/06/21 18:07:37  mikef
 *** empty log message ***
 
@@ -19,45 +31,15 @@ Add header and log keywords to all files
 
 */
 
-#include <p2c/p2c.h>
 #include <stdio.h>
 #ifndef MATHLIB_H
 #include "mathlib.h"
 #endif
 
-
-#define v_light         2.99792458e+8   /*m/s*/
-#define Eo              8.854187818e-12   /*F/m*/
-#define Pi              3.14159265358979232646e+00
-#define No              (120*Pi) /* ohms */
-   
 double Zoo,Zoe,Z0,c,whso,whse,P,er,r,H,F,G;
 double w,b,s,r,k;
 
-/***********************************************************************/
-Static Void get_str(Prompt, ret)
-Char *Prompt, *ret;
-{
-  Char *TEMP;
-
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, '\n');
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-/***********************************************************************/
-Static Void get_double(Prompt, ret)
-Char *Prompt;
-double *ret;
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
+#include "get_input.h"
 
 #define JMAX 9000
 
@@ -104,7 +86,6 @@ int argc;
 char *argv[];
 {
    double coupling,Zo,kprime,R3,k;
-   int another;
    
    printf("Stripline broadside coupled line calculator.\n");
    printf("Copyright (C) 1999 M. Ferrara\n");

@@ -9,6 +9,15 @@
 $Header$
 
 $Log$
+Revision 1.4  2003/04/18 21:31:56  mikef
+*** empty log message ***
+
+Revision 1.5  2002/12/05 23:41:13  mikef
+*** empty log message ***
+
+Revision 1.4  2002/12/05 22:17:58  mikef
+Remove p2c cruft
+
 Revision 1.3  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -29,44 +38,7 @@ double wire_guage[40] = {
 .2400, .2145, .1915, .1700, .1510, .1345, .1205, .1080, .09545, .08380  
 };
 
-static void get_str(char *Prompt, char *ret)
-{
-  char *TEMP;
-
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, "\n");
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-static int get_yn(char *Prompt)
-{
-   char ans[255];
-   get_str(Prompt,&ans);
-   if (toupper(ans[0]='Y')) {
-      return(1);
-   }
-   return(0);
-}
-
-/***********************************************************************/
-static void get_double(char *Prompt, double *ret)
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
-/***********************************************************************/
-static void get_int(char *Prompt, long *ret)
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%ld%*[^\n]", ret);
-  if (getchar()==EOF) exit(0);
-}  /*get_longreal*/
-
+#include "get_input.h"
 
 int guage(double g)
 {
@@ -80,7 +52,7 @@ int guage(double g)
 
 int main(int argc, char **argv)
 {
-   double d,D,S,b,H,N,n,tau,Zo,Qfilt,Qu,f0,bw;
+   double d,D,S,b,H,N,n,Zo,Qfilt,Qu,f0,bw;
    double q0,q1,qn,k[50],hd[50],thick;
    double Qd,RbZo,theta,tapin,tapout;
    int square=0,sect=1,j;
