@@ -1,6 +1,21 @@
 #$Header$
 #
 #$Log$
+#Revision 1.6  2002/08/17 19:31:13  mikef
+#*** empty log message ***
+#
+#Revision 1.9  2002/07/08 20:17:06  mikef
+#Fix for typo in Waddell's book
+#
+#Revision 1.8  2002/07/08 01:06:49  mikef
+#Add slectl with finite strip thickness
+#
+#Revision 1.7  2002/07/07 23:16:37  mikef
+#Incremental checkin
+#
+#Revision 1.6  2002/07/07 21:35:22  mikef
+#Initial import
+#
 #Revision 1.5  2000/06/21 18:05:48  mikef
 #*** empty log message ***
 #
@@ -19,7 +34,7 @@
 
 CC = gcc
 
-CFLAGS = -O
+CFLAGS = -g
 
 #LDFLAGS =-L /usr/local/lib/p2c 
 
@@ -27,7 +42,7 @@ MAKEFILE = Makefile
 
 SHELL = /bin/sh
 
-TARGETS	= stripcalc msctl msctl2 linestub cheby bpf helical_c helical_s helical_filter interdig slbrctl
+TARGETS	= stripcalc msctl msctl2 linestub cheby bpf helical_c helical_s helical_filter interdig slbrctl slectl
 
 all:		$(TARGETS)
 
@@ -42,6 +57,9 @@ msctl:	msctl.c mathlib.o myprintf.o
 
 slbrctl: slbrctl.c mathlib.o myprintf.o
 	$(CC) $(CFLAGS) -o slbrctl slbrctl.c mathlib.o myprintf.o -lm
+
+slectl: slectl.c stripsubs.o mathlib.o myprintf.o
+	$(CC) $(CFLAGS) -o slectl slectl.c stripsubs.o mathlib.o myprintf.o -lm
 
 interdig:	interdig.c mathlib.o myprintf.o
 	$(CC) $(CFLAGS) -o interdig interdig.c mathlib.o myprintf.o -lm

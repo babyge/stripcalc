@@ -4,6 +4,18 @@
 $Header$
 
 $Log$
+Revision 1.4  2002/08/17 19:31:13  mikef
+*** empty log message ***
+
+Revision 1.6  2002/07/08 01:13:46  mikef
+Add stripline thickness
+
+Revision 1.5  2002/07/08 01:06:49  mikef
+Add slectl with finite strip thickness
+
+Revision 1.4  2002/07/07 23:16:37  mikef
+Incremental checkin
+
 Revision 1.3  2000/08/29 03:40:48  mikef
 Fix ill-conditioned output for Offset stripline with zero plate-up thickness.
 
@@ -52,12 +64,14 @@ double *result;
   switch (Strip_type) {
 
   case Microstrip:
-    MSTP_Z(h, Er, w, &Zo, &Eeff);
+    t = dimension[9];
+    MSTP_Z(h, Er, w, t, &Zo, &Eeff);
     break;
 
   case BuriedMicrostrip:
     b=dimension[8];
-    BMSTP_Z(h, Er, w, b, &Zo, &Eeff);
+    t = dimension[9];
+    BMSTP_Z(h, Er, w, b, t, &Zo, &Eeff);
     break;
 
   case GCPW:
@@ -81,17 +95,23 @@ double *result;
     f = dimension[7];
     SLT_Z(h, Er, w, f, &Zo, &Eeff, &Calc_err);
     if (Calc_err != 0)
-      _Escape(1);
+       /*      _Escape(1);*/
     break;
 
   case Stripline:
      b = dimension[8];
-     STPLN_Z(b, Er, w, &Zo, &Eeff);
+     t = dimension[9];
+     if (t == 0) {
+	STPLN_Z(b, Er, w, &Zo, &Eeff);
+     } else {
+	FTSTPLN_Z(b, Er, w, t, &Zo, &Eeff);
+     }
      break;
 
   case OffsetStripline:
      b = dimension[8];
-     OSTPLN_Z (b, Er, w, h, &Zo, &Eeff);
+     t = dimension[9];
+     OSTPLN_Z (b, Er, w, h, t, &Zo, &Eeff);
      break;
   }/*case*/
   result[0] = Zo;
@@ -259,10 +279,17 @@ double h, Er, w, *Zo, *Eeff;
   *Zo = Zo_air / sqrt(*Eeff);
 }  /*procedure*/
 #else
-Void MSTP_Z(h, Er, w, Zo, Eeff)
-double h, Er, w, *Zo, *Eeff;
+Void MSTP_Z(h, Er, w, t, Zo, Eeff)
+double h, Er, w, *Zo, t, *Eeff;
 {
    double tmp1,tmp2;
+   double dwt,dwp;
+   if (t) {
+     /*Width correction for finite thickness*/
+     dwt = (1.0/Pi)*log( (4*E) / sqrt((t*t/(h*h)) + pow((1/Pi)/((w/t)+1.1),2)));
+     dwp = (dwt * t) * ( (1.0 + 1.0/Er)/2.0);
+     w = w + dwp;
+   }
 
    tmp1=sqrt(power(((14.0 + (8.0/Er))/11.0),2)*power((4.0*h/w),2)+
 	     (((1.0 + (1.0/Er))/2.0)*Pi*Pi));
@@ -279,11 +306,11 @@ double h, Er, w, *Zo, *Eeff;
 }
 #endif
 
-Void BMSTP_Z(h, Er, w, b, Zo, Eeff)
-double h, Er, w, b, *Zo, *Eeff;
+Void BMSTP_Z(h, Er, w, b, t, Zo, Eeff)
+double h, Er, w, b, t, *Zo, *Eeff;
 {
 double Eburied, Zomicrostrip, Emicrostrip;
-MSTP_Z(h, Er, w, &Zomicrostrip, &Emicrostrip);
+MSTP_Z(h, Er, w, t, &Zomicrostrip, &Emicrostrip);
 Eburied=Emicrostrip*exp(-2.0*b/h) + Er*(1.0 - exp(-2.0*b/h));
 *Eeff=Eburied;
 *Zo=Zomicrostrip*sqrt(Emicrostrip)/sqrt(Eburied);
@@ -338,8 +365,8 @@ int *Error_ret;
 
 /*Zero strip thickness stripline*/
 /*Transmission Line Design Handbook, Wadell, pp 125-126 */
-Void STPLN_Z(h, Er, w, Zo, Eeff)
-     double h, Er, w, *Zo, *Eeff;
+Void STPLN_Z(b, Er, w, Zo, Eeff)
+     double b, Er, w, *Zo, *Eeff;
 {
    double k,kprime;
 
@@ -348,6 +375,24 @@ Void STPLN_Z(h, Er, w, Zo, Eeff)
    
    *Zo=(No/(4.0*sqrt(Er)))*ELIP1(k)/ELIP1(kprime);
    *Eeff=Er;
+}
+
+/*Finite strip thickness stripline*/
+/*Transmission Line Design Handbook, Wadell, pp 126,127*/
+Void FTSTPLN_Z(b, Er, w, t, Zo, Eeff)
+     double b, Er, w, t, *Zo, *Eeff;
+{
+   double m,dwt,wprime;
+   double tmp;
+
+   *Eeff=Er;
+   m = 6.0/(3.0 + (2.0*t/(b-t)));
+   tmp = pow(1.0/((2.0*(b-t)/t) + 1.0),2.0) + pow((1.0/(4*Pi))/((w/t)+1.1),m);
+   dwt = (1.0/Pi) * (1.0 - 0.5 * log(tmp));
+   wprime = w+(dwt*t);
+   tmp = sqrt(pow(8.0*(b-t)/(Pi*wprime),2)+6.27) + (8.0*(b-t)/(Pi*wprime));
+   tmp *= 4.0*(b-t)/(Pi*wprime);
+   *Zo = No/(4.0*Pi*sqrt(Er)) * log(1.0 + tmp);
 }
 
 #ifdef OLD_OSTPLN
@@ -392,12 +437,11 @@ double func(x)
    return(ret);
 }
 
-Void OSTPLN_Z (b, Er, w, h, Zo, Eeff)
-     double b,Er,w,h,*Zo,*Eeff;
+Void OSTPLN_Z (b, Er, w, h, t, Zo, Eeff)
+     double b,Er,w,h,t,*Zo,*Eeff;
 {
    double Zoair,dZoair,h1,h2;
    double Zoh1, Zoh2, Zoctr;
-   double t = 0;
    double s = 0;
    double x,A,d0,cl;
    double gam,beta,k,kp,wbeff,Cfp;

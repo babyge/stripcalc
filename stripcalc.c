@@ -6,6 +6,12 @@
 $Header$
 
 $Log$
+Revision 1.4  2002/08/17 19:31:13  mikef
+*** empty log message ***
+
+Revision 1.4  2002/07/08 01:13:46  mikef
+Add stripline thickness
+
 Revision 1.3  2000/08/29 03:40:48  mikef
 Fix ill-conditioned output for Offset stripline with zero plate-up thickness.
 
@@ -131,6 +137,7 @@ Void load_dimension()
   dim_vector[6] = gw;
   dim_vector[7] = f;
   dim_vector[8] = b;
+  dim_vector[9] = t;
 }
 
 
@@ -210,7 +217,6 @@ Char *argv[];
 	case 't':
 	   current_line_type = Stripline;
 	   printf("Stripline\n");
-	   printf("zero thickness center conductor.\n");
 	   break;
 
 	case 'O':
@@ -256,8 +262,9 @@ Char *argv[];
       case Microstrip:
       get_longreal("[2] Substrate height (h)?", &height);
       get_longreal("[3] Center conductor width:", &w);
+      get_longreal("[9] Conductor thickness:", &t);
 	if (calculation == forward) {
-	  MSTP_Z(height, Er, w, &Zo, &Eeff);
+	  MSTP_Z(height, Er, w, t, &Zo, &Eeff);
 	  printf("Zo=%3.2f Eeff=%3.2f\n", Zo, Eeff);
 	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Eeff));
 	} else {
@@ -290,8 +297,9 @@ Char *argv[];
       get_longreal("[2] Substrate height strip to gnd (h)?", &height);
       get_longreal("[8] Burial depth to strip (b)?", &b);
       get_longreal("[3] Center conductor width:", &w);
+      get_longreal("[9] Conductor thickness:", &t);
 	if (calculation == forward) {
-	  BMSTP_Z(height, Er, w, b, &Zo, &Eeff);
+	  BMSTP_Z(height, Er, w, b, t, &Zo, &Eeff);
 	  printf("Zo=%3.2f Eeff=%3.2f\n", Zo, Eeff);
 	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Eeff));
 	} else {
@@ -324,8 +332,13 @@ Char *argv[];
       case Stripline:
 	get_longreal("[8] gnd-gnd distance (b)?", &b);
 	get_longreal("[3] Center conductor width:", &w);
+	get_longreal("[9] Conductor thickess:", &t);
 	if (calculation == forward) {
-	  STPLN_Z(b, Er, w, &Zo, &Eeff);
+	   if (t ==0) {
+	      STPLN_Z(b, Er, w, &Zo, &Eeff);
+	   } else {
+	      FTSTPLN_Z(b, Er, w, t, &Zo, &Eeff);
+	   }
 	  printf("Zo=%3.2f", Zo );
 	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Er));
 	} else {
@@ -358,8 +371,9 @@ Char *argv[];
 	get_longreal("[8] gnd-gnd distance (b)?", &b);
 	get_longreal("[2] gnd-strip distance (h)?", &height);
 	get_longreal("[3] Center conductor width:", &w);
+	get_longreal("[9] Conductor thickness:", &t);
 	if (calculation == forward) {
-	  OSTPLN_Z(b, Er, w, height, &Zo, &Eeff);
+	  OSTPLN_Z(b, Er, w, height, t, &Zo, &Eeff);
 	  printf("Zo=%3.2f\n", Zo );
 	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Er));
 	} else {

@@ -3,6 +3,15 @@
 $Header$
 
 $Log$
+Revision 1.3  2002/08/17 19:31:13  mikef
+*** empty log message ***
+
+Revision 1.4  2002/07/08 01:13:46  mikef
+Add stripline thickness
+
+Revision 1.3  2002/07/07 23:16:37  mikef
+Incremental checkin
+
 Revision 1.2  2000/06/21 18:05:48  mikef
 *** empty log message ***
 
@@ -32,10 +41,10 @@ GLOBAL Void ACPW_Z PP((double h, double Er, double b, double d1, double d2,
 		       double *Zo, double *Eeff));
 GLOBAL Void GCPW_Z PP((double h, double Er, double w, double d, double *Zo,
 		       double *Eeff));
-GLOBAL Void MSTP_Z PP((double h, double Er, double w, double *Zo,
+GLOBAL Void MSTP_Z PP((double h, double Er, double w, double t, double *Zo,
 		       double *Eeff));
 
-GLOBAL Void BMSTP_Z PP((double h, double Er, double w, double b, double *Zo,
+GLOBAL Void BMSTP_Z PP((double h, double Er, double w, double b, double t, double *Zo,
 		       double *Eeff));
 
 
@@ -44,15 +53,17 @@ GLOBAL Void SLT_Z PP((double h, double Er, double w, double f, double *Zo,
 
 GLOBAL Void STPLN_Z PP((double b, double Er, double w, double *Zo, double *Eeff));
 
-GLOBAL Void OSTPLN_Z PP((double b, double Er, double w, double h, double *Zo, double *Eeff));
+GLOBAL Void FTSTPLN_Z PP((double b, double Er, double w, double t, double *Zo, double *Eeff));
+
+GLOBAL Void OSTPLN_Z PP((double b, double Er, double w, double h, double t, double *Zo, double *Eeff));
 
 
 #define v_light         2.99792458e+8   /*m/s*/
 #define Eo              8.854187818e-12   /*F/m*/
 #define MAXERR          0.0001
-#define Pi              3.14159265358979232646e+00
+#define Pi              3.14159265358979323846e+00
 #define No              (120*Pi) /* ohms */
-
+#define E               2.7182818284590452354
 
 typedef enum {
   Microstrip, BuriedMicrostrip, GCPW, ACPW, CPW, Slotline, Stripline, OffsetStripline
@@ -65,7 +76,7 @@ typedef double output_vector[5];
 
 
 linetype current_line_type;
-double w, d1, d2, d, Zo, height, Er, gw, Eeff, f, b;
+double w, d1, d2, d, Zo, height, Er, gw, Eeff, f, b, t;
 Char Ans[133];
 boolean Finite_calc, OK;
 Char Letter_selection;
