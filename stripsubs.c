@@ -1,68 +1,28 @@
 /* Output from p2c, the Pascal-to-C translator */
 /* From input file "stripsubs.p" */
+/*
+$Header$
 
+$Log$
+Revision 1.2  2000/06/21 18:05:48  mikef
+*** empty log message ***
 
+Revision 1.9  2000/06/16 20:39:47  mikef
+Better offset stripline calc.
+
+Revision 1.8  2000/02/24 00:00:09  mikef
+compilation cleanup
+
+Revision 1.7  1999/12/13 22:51:13  mikef
+Add header and log keywords to all files
+
+*/
 /*generate symbol tables*/
 
 #include <p2c/p2c.h>
 
 #define STRIPSUBS_G
 #include "stripsubs.h"
-
-
-#define Pi              3.14159265358979232646e+00
-#define v_light         3e+8   /*m/s*/
-#define Eo              8.85e-12   /*F/m*/
-
-
-typedef enum {
-  Microstrip, GCPW, ACPW, CPW, Slotline
-} linetype;
-typedef enum {
-  backward, forward
-} calctype;
-typedef double input_vector[10];
-typedef double output_vector[5];
-
-
- linetype current_line_type;
- double w, d1, d2, d, Zo, height, Er, gw, Eeff, f;
- Char Ans[133];
- boolean Finite_calc, OK;
- Char Letter_selection;
- calctype calculation;
- int target_parameter;
- double target_value;
- int variable_parameter;
- input_vector dim_vector;
- output_vector result_vector;
- boolean loop, debug_mode;
- int Calc_error;
-
-
-/***********************************************************************/
-Void get_str(Prompt, ret)
-Char *Prompt, *ret;
-{
-  Char *TEMP;
-
-  printf("%*s", strlen(Prompt), Prompt);
-  fgets(ret, 133, stdin);
-  TEMP = strchr(ret, '\n');
-  if (TEMP != NULL)
-    *TEMP = 0;
-}  /*get_str*/
-
-
-/***********************************************************************/
-Void get_longreal(Prompt, ret)
-Char *Prompt;
-double *ret;
-{
-  printf("%*s", strlen(Prompt), Prompt);
-  scanf("%lg%*[^\n]", ret);
-  getchar();
-}  /*get_longreal*/
 
 
 /***********************************************************************/
@@ -80,6 +40,7 @@ double *result;
   double d;   /*dimension[6]*/
   double sw;   /*dimension[7]*/
   double f;   /*dimension[8]*/
+  double b;
   int Calc_err;
 
   Er = dimension[0];
@@ -89,6 +50,11 @@ double *result;
 
   case Microstrip:
     MSTP_Z(h, Er, w, &Zo, &Eeff);
+    break;
+
+  case BuriedMicrostrip:
+    b=dimension[8];
+    BMSTP_Z(h, Er, w, b, &Zo, &Eeff);
     break;
 
   case GCPW:
@@ -114,71 +80,20 @@ double *result;
     if (Calc_err != 0)
       _Escape(1);
     break;
+
+  case Stripline:
+     b = dimension[8];
+     STPLN_Z(b, Er, w, &Zo, &Eeff);
+     break;
+
+  case OffsetStripline:
+     b = dimension[8];
+     OSTPLN_Z (b, Er, w, h, &Zo, &Eeff);
+     break;
   }/*case*/
   result[0] = Zo;
   result[1] = Eeff;
 }  /*procedure*/
-
-
-#define MAXERR          0.0001
-
-
-/***************************************************************************/
-Void Newton(Strip_type, dimension, var_parm, finite, result,
-		   target_parm, target_val)
-linetype Strip_type;
-double *dimension;
-int var_parm;
-boolean finite;
-double *result;
-int target_parm;
-double target_val;
-{
-  double current_val, increment, slope, error;
-  int iteration;
-
-  iteration = 0;
-  Strip_Z(Strip_type, dimension, finite, result);
-  current_val = result[target_parm - 1];
-  error = fabs(target_val - result[target_parm - 1]);
-  while (error > MAXERR) {
-    iteration++;
-    /*calculate f'(x)*/
-    increment = dimension[var_parm - 1] / 100;
-    dimension[var_parm - 1] += increment;
-    Strip_Z(Strip_type, dimension, finite, result);
-    slope = (result[target_parm - 1] - current_val) / increment;
-    /*x(n+1)=x(n)-f(x(n))/f'(x(n))*/
-    dimension[var_parm - 1] += (target_val - current_val) / slope - increment;
-    /*find new error*/
-    Strip_Z(Strip_type, dimension, finite, result);
-    current_val = result[target_parm - 1];
-    error = fabs(target_val - current_val);
-    if (debug_mode) {
-      printf("Iteration=%3d\n", iteration);
-      printf("Dimension=%6.3f Current val=%3.4f\n",
-	     dimension[var_parm - 1], current_val);
-      printf("Error=%3.5f\n\n", error);
-    }
-  }  /*loop*/
-}  /*procedure*/
-
-#undef MAXERR
-
-
-/**********************************************************************/
-Void load_dimension()
-{
-  dim_vector[0] = Er;
-  dim_vector[1] = height;
-  dim_vector[2] = w;
-  dim_vector[3] = d1;
-  dim_vector[4] = d2;
-  dim_vector[5] = d;
-  dim_vector[6] = gw;
-  dim_vector[7] = f;
-}
-
 
 
 /************************************************************************/
@@ -224,10 +139,6 @@ double *Zo, *Eeff;
   *Zo = 30 * Pi / sqrt(*Eeff) * elip_ratio1;
 }  /*procedure*/
 
-#undef Pi
-
-
-#define Pi              3.1415926535897932364e+00
 
 
 /*********************************************************************/
@@ -293,11 +204,6 @@ double h, Er, b, d1, d2, *Zo, *Eeff;
   /*if statement*/
 }  /*ACPW_Z*/
 
-#undef Pi
-
-
-#define Pi              3.1415926535897932364e+00
-
 
 /* ************************************************************************* */
 /* * Procedure GCPW_Z  Grounded Coplanar Waveguide Zo and Eeff             * */
@@ -325,12 +231,7 @@ double h, Er, w, d, *Zo, *Eeff;
   *Zo = 60 * Pi * temp1 / sqrt(*Eeff);
 }  /*GCPW_Z*/
 
-#undef Pi
-
-
-#define Pi              3.1415926535897932364e+00
-
-
+#ifdef OLD_MSTP
 /***********************************************************************/
 /**  Procedure MSTP_Z Calculates microstrip impedance and            **/
 /**  Effective dielectric constant from physical dimensions           **/
@@ -354,12 +255,39 @@ double h, Er, w, *Zo, *Eeff;
   Zo_air = 59.96 * log(func_u / u + sqrt(1 + 4 / (u * u)));
   *Zo = Zo_air / sqrt(*Eeff);
 }  /*procedure*/
+#else
+Void MSTP_Z(h, Er, w, Zo, Eeff)
+double h, Er, w, *Zo, *Eeff;
+{
+   double tmp1,tmp2;
 
-#undef Pi
+   tmp1=sqrt(power(((14.0 + (8.0/Er))/11.0),2)*power((4.0*h/w),2)+
+	     (((1.0 + (1.0/Er))/2.0)*Pi*Pi));
+
+   tmp2=log(1.0 + (4.0*h/w)*(((14.0+(8.0/Er))/11.0)*(4.0*h/w)+tmp1));
+   *Zo=No*tmp2/(2.0*sqrt(2.0)*Pi*sqrt(Er+1.0));
+
+   if (w/h <= 1.0) {
+      *Eeff=((Er+1)/2) + ((Er-1)/2*(pow((1+(12*h/w)),-0.5) + 
+				    0.04*pow((1.0 - (w/h)),2)));
+   } else {
+      *Eeff=((Er+1)/2) + ((Er-1)/2*(pow((1+(12*h/w)),-0.5)));
+   }
+}
+#endif
+
+Void BMSTP_Z(h, Er, w, b, Zo, Eeff)
+double h, Er, w, b, *Zo, *Eeff;
+{
+double Eburied, Zomicrostrip, Emicrostrip;
+MSTP_Z(h, Er, w, &Zomicrostrip, &Emicrostrip);
+Eburied=Emicrostrip*exp(-2.0*b/h) + Er*(1.0 - exp(-2.0*b/h));
+*Eeff=Eburied;
+*Zo=Zomicrostrip*sqrt(Emicrostrip)/sqrt(Eburied);
+}
 
 
-#define Pi              3.1415926535897932364e+00
-#define c               3.0e+08   /*m/s*/
+#define c   v_light
 
 
 /* ********************************************************************* */
@@ -405,9 +333,107 @@ int *Error_ret;
   *Eeff = 1 / (lamr * lamr);
 }  /*procedure*/
 
-#undef Pi
-#undef c
+/*Zero strip thickness stripline*/
+/*Transmission Line Design Handbook, Wadell, pp 125-126 */
+Void STPLN_Z(h, Er, w, Zo, Eeff)
+     double h, Er, w, *Zo, *Eeff;
+{
+   double k,kprime;
 
+   k=sech((Pi*w)/(2.0*b));
+   kprime=tanh((Pi*w)/(2.0*b));
+   
+   *Zo=(No/(4.0*sqrt(Er)))*ELIP1(k)/ELIP1(kprime);
+   *Eeff=Er;
+}
+
+#ifdef OLD_OSTPLN
+
+Void OSTPLN_Z (b, Er, w, h, Zo, Eeff)
+     double b,Er,w,h,*Zo,*Eeff;
+{
+   double Zoair,dZoair,h1,h2;
+   double Zoh1, Zoh2, Zoctr;
+   double t = 0;
+
+   h1=min(b-h-t,h);
+   h2=max(b-h-t,h);
+   if (h1 == h2) { /* Symmetrical */
+      STPLN_Z(h1, Er, w, Zo, Eeff);
+      return;
+   }
+
+   STPLN_Z(h1, 1.0, w, &Zoh1, Eeff);
+   STPLN_Z(h2, 1.0, w, &Zoh2, Eeff);
+   STPLN_Z(b, 1.0, w, &Zoctr, Eeff);
+   
+
+   Zoair=2.0*((Zoh1*Zoh2)/(Zoh1 + Zoh2));
+
+   dZoair=(0.26*Pi/8.0)*Zoair*Zoair*
+          power((0.5-((h1 + (t/2))/(h1+h2+t))),2.2) *
+          power(((t+w)/(h1+h2+t)),2.9);
+
+   *Zo=(1.0/sqrt(Er))*(Zoctr - dZoair);
+   *Eeff=Er;
+}
+
+#else
+
+double func(x) 
+     double x;
+{
+   double ret;
+   ret = (1.0 - 2.0*x)*(((1.0-x)*log(1.0-x))-x*log(x));
+   return(ret);
+}
+
+Void OSTPLN_Z (b, Er, w, h, Zo, Eeff)
+     double b,Er,w,h,*Zo,*Eeff;
+{
+   double Zoair,dZoair,h1,h2;
+   double Zoh1, Zoh2, Zoctr;
+   double t = 0;
+   double s = 0;
+   double x,A,d0,cl;
+   double gam,beta,k,kp,wbeff,Cfp;
+
+   *Eeff=Er;
+   h1=min(b-h-t,h);
+   h2=max(b-h-t,h);
+   if (h1 == h2) { /* Symmetrical */
+      STPLN_Z(h1, Er, w, Zo, Eeff);
+      return;
+   }
+
+   s=(2*h2)+t-b;
+   if (w>=t) {
+      x=t/w;
+   } else {
+      x=w/t;
+   }
+   d0=w*(0.5008 + 1.0235*x + 1.0230*x*x + 1.1564*x*x*x + 0.4749*x*x*x*x);
+   cl=((b-s)/2.0);
+   A=sin(Pi*cl/b)*coth(Pi*d0/(2*b));
+
+   if ((w/(b-t)) < 0.35) {
+      *Zo = No*acosh(A) /(2.0*Pi*sqrt(Er));
+   } else {
+      if ((w/(b-t)) < (t/b)) {
+	 k=sech(Pi*w/(2*b));
+	 kp=tanh(Pi*w/(2*b));
+	 wbeff= (w/b) + power((1.0-(t/b)),8.0)*((ELIP1(kp)/ELIP1(k)) - 2.0*log(2.0)/Pi - w/b);
+      } else {
+	 wbeff = w/b;
+      }
+      beta=1.0-(t/b);
+      gam=(cl/b)-(t/(2*b));
+      Cfp=Er*Eo/Pi*(2.0*log(1.0/(gam*(beta-gam))) + (func(t/(2*b))-func(cl/b))/(gam*(beta-gam)));
+      *Zo=(No/sqrt(Er))*(1/(wbeff/gam + wbeff/(beta-gam) + 2*Cfp/(Eo*Er)));
+   }
+}
+
+#endif
 
 /*module*/
 

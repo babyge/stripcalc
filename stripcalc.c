@@ -1,6 +1,21 @@
 /* Output from p2c, the Pascal-to-C translator */
 /* From input file "stripcalc.p" */
 
+/*
+
+$Header$
+
+$Log$
+Revision 1.2  2000/06/21 18:05:48  mikef
+*** empty log message ***
+
+Revision 1.7  2000/06/16 20:39:47  mikef
+Better offset stripline calc.
+
+Revision 1.6  1999/12/13 22:51:13  mikef
+Add header and log keywords to all files
+
+*/
 
 /*generate symbol tables*/
 
@@ -27,40 +42,12 @@
 /** planar geometries, including Microstrip, Coplanar, Grounded       **/
 /** Coplanar, and Slotline. Where necessary it uses an iterative      **/
 /** technique to solve for the required parameters.                   **/
-/** Copyright (C) 1986  M. Ferrara                                    **/
+/** Copyright (C) 1986,1987,1992,1995,1999  M. Ferrara                                    **/
 /** ***************************************************************** **/
-
-#define v_light         2.99792458e+8   /*m/s*/
-#define Eo              8.854187818e-12   /*F/m*/
-
-
-typedef enum {
-  Microstrip, GCPW, ACPW, CPW, Slotline
-} linetype;
-typedef enum {
-  backward, forward
-} calctype;
-typedef double input_vector[10];
-typedef double output_vector[5];
-
-
-Static linetype current_line_type;
-Static double w, d1, d2, d, Zo, height, Er, gw, Eeff, f;
-Static Char Ans[133];
-Static boolean Finite_calc, OK;
-Static Char Letter_selection;
-Static calctype calculation;
-Static int target_parameter;
-Static double target_value;
-Static int variable_parameter;
-Static input_vector dim_vector;
-Static output_vector result_vector;
-Static boolean loop, debug_mode;
-Static int Calc_error;
 
 
 /***********************************************************************/
-Static Void get_str(Prompt, ret)
+Void get_str(Prompt, ret)
 Char *Prompt, *ret;
 {
   Char *TEMP;
@@ -74,7 +61,7 @@ Char *Prompt, *ret;
 
 
 /***********************************************************************/
-Static Void get_longreal(Prompt, ret)
+Void get_longreal(Prompt, ret)
 Char *Prompt;
 double *ret;
 {
@@ -84,66 +71,10 @@ double *ret;
 }  /*get_longreal*/
 
 
-/***********************************************************************/
-Static Void Strip_Z(Strip_type, dimension, finite, result)
-linetype Strip_type;
-double *dimension;
-boolean finite;
-double *result;
-{
-  double Er;   /*dimension[1]*/
-  double h;   /*dimension[2]*/
-  double w;   /*dimension[3]*/
-  double d1;   /*dimension[4]*/
-  double d2;   /*dimension[5]*/
-  double d;   /*dimension[6]*/
-  double sw;   /*dimension[7]*/
-  double f;   /*dimension[8]*/
-  int Calc_err;
-
-  Er = dimension[0];
-  h = dimension[1];
-  w = dimension[2];
-  switch (Strip_type) {
-
-  case Microstrip:
-    MSTP_Z(h, Er, w, &Zo, &Eeff);
-    break;
-
-  case GCPW:
-    d = dimension[5];
-    GCPW_Z(h, Er, w, d, &Zo, &Eeff);
-    break;
-
-  case ACPW:
-    d1 = dimension[3];
-    d2 = dimension[4];
-    ACPW_Z(h, Er, w, d1, d2, &Zo, &Eeff);
-    break;
-
-  case CPW:
-    d = dimension[5];
-    sw = dimension[6];
-    CPW_Z(h, Er, w, d, sw, finite, &Zo, &Eeff);
-    break;
-
-  case Slotline:
-    f = dimension[7];
-    SLT_Z(h, Er, w, f, &Zo, &Eeff, &Calc_err);
-    if (Calc_err != 0)
-      _Escape(1);
-    break;
-  }/*case*/
-  result[0] = Zo;
-  result[1] = Eeff;
-}  /*procedure*/
-
-
-#define MAXERR          0.0001
 
 
 /***************************************************************************/
-Static Void Newton(Strip_type, dimension, var_parm, finite, result,
+Void Newton(Strip_type, dimension, var_parm, finite, result,
 		   target_parm, target_val)
 linetype Strip_type;
 double *dimension;
@@ -186,7 +117,7 @@ double target_val;
 
 
 /**********************************************************************/
-Static Void load_dimension()
+Void load_dimension()
 {
   dim_vector[0] = Er;
   dim_vector[1] = height;
@@ -196,6 +127,7 @@ Static Void load_dimension()
   dim_vector[5] = d;
   dim_vector[6] = gw;
   dim_vector[7] = f;
+  dim_vector[8] = b;
 }
 
 
@@ -205,7 +137,8 @@ int argc;
 Char *argv[];
 {  /*program*/
   PASCAL_MAIN(argc, argv);
-  printf("Stripcalc -- (C) 1986 M.Ferrara\n");
+  printf("Stripcalc -- (C) 1986,1987,1992,1995,1999 M.Ferrara\n");
+  fflush(stdout);
   loop = true;
   debug_mode = false;
   while (loop) {
@@ -217,7 +150,10 @@ Char *argv[];
 	printf("   (G) Grounded Coplanar Waveguide\n");
 	printf("   (C) Symmetric Coplanar Waveguide\n");
 	printf("   (M) Microstrip Transmission Line\n");
+	printf("   (B) Buried Microstrip Transmission line\n");
 	printf("   (S) Slotline\n");
+        printf("   (T) sTripline\n");
+	printf("   (O) Offset Stripline\n");
 	printf("   (Q) Quit\n");
 	printf("Enter letter of selection:");
 	scanf("%c%*[^\n]", &Letter_selection);
@@ -252,6 +188,12 @@ Char *argv[];
 	  printf("Microstrip transmission line\n");
 	  break;
 
+	case 'B':
+	case 'b':
+	  current_line_type = BuriedMicrostrip;
+	  printf("Buried Microstrip transmission line\n");
+	  break;
+
 	case 'S':
 	case 's':
 	  current_line_type = Slotline;
@@ -260,6 +202,20 @@ Char *argv[];
 	  printf("   dimensions are in microns and frequencies\n");
 	  printf("   are in GHz.\n");
 	  break;
+
+	case 'T':
+	case 't':
+	   current_line_type = Stripline;
+	   printf("Stripline\n");
+	   printf("zero thickness center conductor.\n");
+	   break;
+
+	case 'O':
+	case 'o':
+	   current_line_type = OffsetStripline;
+	   printf("Offset Stripline\n");
+	   printf("zero thickness center conductor.\n");
+	   break;
 
 	case 'D':
 	case 'd':  /*turn on debug mode*/
@@ -292,11 +248,11 @@ Char *argv[];
       if (calculation == backward)
 	printf("Input initial guess in place of unknown.\n");
       get_longreal("[1] Relative Dielectric constant (Er)?", &Er);
-      get_longreal("[2] Substrate height (h)?", &height);
       switch (current_line_type) {
 
       case Microstrip:
-	get_longreal("[3] Center conductor width:", &w);
+      get_longreal("[2] Substrate height (h)?", &height);
+      get_longreal("[3] Center conductor width:", &w);
 	if (calculation == forward) {
 	  MSTP_Z(height, Er, w, &Zo, &Eeff);
 	  printf("Zo=%3.2f Eeff=%3.2f\n", Zo, Eeff);
@@ -327,8 +283,111 @@ Char *argv[];
 	}
 	break;
 
-      case ACPW:
+     case BuriedMicrostrip:
+      get_longreal("[2] Substrate height strip to gnd (h)?", &height);
+      get_longreal("[8] Burial depth to strip (b)?", &b);
+      get_longreal("[3] Center conductor width:", &w);
+	if (calculation == forward) {
+	  BMSTP_Z(height, Er, w, b, &Zo, &Eeff);
+	  printf("Zo=%3.2f Eeff=%3.2f\n", Zo, Eeff);
+	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Eeff));
+	} else {
+	  target_parameter = 0;
+	  while ((unsigned)target_parameter >= 32 ||
+		 ((1 << target_parameter) & 0x6) == 0) {
+	    printf("Target Zo [1] or Eeff [2]?");
+	    scanf("%d%*[^\n]", &target_parameter);
+	    getchar();
+	  }
+	  get_longreal("Target value?", &target_value);
+	  variable_parameter = 0;
+	  while ((unsigned)variable_parameter >= 32 ||
+		 ((1 << variable_parameter) & 0xe) == 0) {
+	    printf("Input number preceeding dimension you want varied:");
+	    scanf("%d%*[^\n]", &variable_parameter);
+	    getchar();
+	  }
+	  load_dimension();
+	  Newton(current_line_type, dim_vector, variable_parameter, true,
+		 result_vector, target_parameter, target_value);
+	  printf("Value of dimension %d = %6.3f\n",
+		 variable_parameter, dim_vector[variable_parameter - 1]);
+	  printf("Zo=%3.2f Eeff=%3.2f\n", Zo, Eeff);
+	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Eeff));
+	}
+	break;
+
+
+      case Stripline:
+	get_longreal("[8] gnd-gnd distance (b)?", &b);
 	get_longreal("[3] Center conductor width:", &w);
+	if (calculation == forward) {
+	  STPLN_Z(b, Er, w, &Zo, &Eeff);
+	  printf("Zo=%3.2f", Zo );
+	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Er));
+	} else {
+	  target_parameter = 0;
+	  while ((unsigned)target_parameter >= 32 ||
+		 ((1 << target_parameter) & 0x6) == 0) {
+	    printf("Target Zo [1] or Eeff [2]?");
+	    scanf("%d%*[^\n]", &target_parameter);
+	    getchar();
+	  }
+	  get_longreal("Target value?", &target_value);
+	  variable_parameter = 0;
+	  while ((unsigned)variable_parameter >= 32 ||
+		 ((1 << variable_parameter) & 0xe) == 0) {
+	    printf("Input number preceeding dimension you want varied:");
+	    scanf("%d%*[^\n]", &variable_parameter);
+	    getchar();
+	  }
+	  load_dimension();
+	  Newton(current_line_type, dim_vector, variable_parameter, true,
+		 result_vector, target_parameter, target_value);
+	  printf("Value of dimension %d = %6.3f\n",
+		 variable_parameter, dim_vector[variable_parameter - 1]);
+	  printf("Zo=%3.2f Eeff=%3.2f\n", Zo, Eeff);
+	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Eeff));
+	}
+	break;
+
+      case OffsetStripline:
+	get_longreal("[8] gnd-gnd distance (b)?", &b);
+	get_longreal("[2] gnd-strip distance (h)?", &height);
+	get_longreal("[3] Center conductor width:", &w);
+	if (calculation == forward) {
+	  OSTPLN_Z(b, Er, w, height, &Zo, &Eeff);
+	  printf("Zo=%3.2f", Zo );
+	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Er));
+	} else {
+	  target_parameter = 0;
+	  while ((unsigned)target_parameter >= 32 ||
+		 ((1 << target_parameter) & 0x6) == 0) {
+	    printf("Target Zo [1] or Eeff [2]?");
+	    scanf("%d%*[^\n]", &target_parameter);
+	    getchar();
+	  }
+	  get_longreal("Target value?", &target_value);
+	  variable_parameter = 0;
+	  while ((unsigned)variable_parameter >= 32 ||
+		 ((1 << variable_parameter) & 0xe) == 0) {
+	    printf("Input number preceeding dimension you want varied:");
+	    scanf("%d%*[^\n]", &variable_parameter);
+	    getchar();
+	  }
+	  load_dimension();
+	  Newton(current_line_type, dim_vector, variable_parameter, true,
+		 result_vector, target_parameter, target_value);
+	  printf("Value of dimension %d = %6.3f\n",
+		 variable_parameter, dim_vector[variable_parameter - 1]);
+	  printf("Zo=%3.2f Eeff=%3.2f\n", Zo, Eeff);
+	  printf("rel. Vp=%1.5f\n", 1 / sqrt(Eeff));
+	}
+	break;
+
+      case ACPW:
+	 get_longreal("[2] Substrate height (h)?", &height);
+	 get_longreal("[3] Center conductor width:", &w);
 	get_longreal("[4] First distance to ground strips:", &d1);
 	get_longreal("[5] Second distance to ground strips:", &d2);
 	if (calculation == forward) {
@@ -362,6 +421,7 @@ Char *argv[];
 	break;
 
       case GCPW:
+	 get_longreal("[2] Substrate height (h)?", &height);
 	get_longreal("[3] Center conductor width:", &w);
 	get_longreal("[6] Distance to ground strips:", &d);
 	if (calculation == forward) {
@@ -395,6 +455,7 @@ Char *argv[];
 	break;
 
       case CPW:
+	 get_longreal("[2] Substrate height (h)?", &height);
 	get_longreal("[3] Center conductor width:", &w);
 	get_longreal("[6] Distance to ground strips:", &d);
 	get_str("Include ground strip width in the analysis?(Y/N)", Ans);
@@ -435,6 +496,7 @@ Char *argv[];
 	break;
 
       case Slotline:
+	 get_longreal("[2] Substrate height (h)?", &height);
 	get_longreal("[3] Slot width:", &w);
 	get_longreal("[8] Frequency:", &f);
 	if (calculation == forward) {

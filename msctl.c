@@ -1,5 +1,16 @@
 /*   Microstrip coupled line calculator
      Copyright (c) 1986,1991 M. Ferrara
+
+$Header$
+
+$Log$
+Revision 1.2  2000/06/21 18:05:48  mikef
+*** empty log message ***
+
+Revision 1.2  1999/12/13 22:51:13  mikef
+Add header and log keywords to all files
+
+
 */
 
 #include <p2c/p2c.h>

@@ -1,5 +1,19 @@
-/*   Microstrip coupled line calculator
-     Copyright (c) 1986,1991 M. Ferrara
+/*   Chebychev filter parameters
+
+$Header$
+
+$Log$
+Revision 1.2  2000/06/21 18:05:48  mikef
+*** empty log message ***
+
+Revision 1.3  2000/02/24 00:00:09  mikef
+compilation cleanup
+
+Revision 1.2  1999/12/13 22:51:13  mikef
+Add header and log keywords to all files
+
+
+
 */
 
 #include <p2c/p2c.h>
@@ -13,9 +27,14 @@
 #define Eo              8.854187818e-12   /*F/m*/
 
 #define isodd(x) (((int)((n)/2))*2 != n)
-#define TRUE (1)
-#define FALSE (0)
 
+#ifndef TRUE
+#define TRUE (1)
+#endif
+
+#ifndef FALSE
+#define FALSE (0)
+#endif
 
 /***********************************************************************/
 Static Void get_str(Prompt, ret)

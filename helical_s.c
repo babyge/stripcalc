@@ -3,6 +3,18 @@
    Helical and Folded Helical Resonators"  Peter Vizmuller,
    Artech House, 1987 ISBN: 0-89006-244-7 */
 
+/*
+$Header$
+
+$Log$
+Revision 1.2  2000/06/21 18:05:48  mikef
+*** empty log message ***
+
+Revision 1.2  1999/12/13 22:51:13  mikef
+Add header and log keywords to all files
+
+*/
+
 /***********************************************************************/
 
 #define NULL ((char *)0)

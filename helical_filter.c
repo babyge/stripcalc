@@ -4,7 +4,18 @@
    Mike Ferrara 8/12/97
    */
 
+/*
 
+$Header$
+
+$Log$
+Revision 1.3  2000/06/21 18:05:48  mikef
+*** empty log message ***
+
+Revision 1.3  1999/12/13 22:51:13  mikef
+Add header and log keywords to all files
+
+*/
 
 
 #define NULL ((char *)0)

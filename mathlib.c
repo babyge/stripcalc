@@ -7,6 +7,20 @@
 
   Changes:
          03/11/86    MRF    Author
+
+$Header$
+
+$Log$
+Revision 1.2  2000/06/21 18:05:48  mikef
+*** empty log message ***
+
+Revision 1.3  2000/06/16 20:39:47  mikef
+Better offset stripline calc.
+
+Revision 1.2  1999/12/13 22:51:13  mikef
+Add header and log keywords to all files
+
+
 */
 
 #include <p2c/p2c.h>
@@ -158,10 +172,10 @@ double power(x, y)
 double x, y;
 {
   if (x == 0) return (0);
-  if (y - (int)y == 0)
+  /*  if (y - (int)y == 0)
     return (x_to_int(x, (int)y));
-  else
-    return exp(y * log(x));
+    else */
+    return pow(x,y);
 }  /*function*/
 
 
