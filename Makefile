@@ -1,96 +1,53 @@
-CFLAGS	      = -O -I/usr/local/include
-
-DEST	      = .
-
-EXTHDRS	      =
-
-HDRS	      = mathlib.h \
-		stripsubs.h
-
-INSTALL	      = install
-
-LD	      = cc
+CFLAGS	      = -Ae -O -I/usr/local/include
 
 LDFLAGS	      =-L /usr/local/lib/p2c 
 
-LIBS	      = 
-
 MAKEFILE      = Makefile
-
-OBJS	      = mathlib.o \
-		stripcalc.o \
-		stripsubs.o
-
-PRINT	      = more
-
-PROGRAM       = stripcalc 
 
 SHELL	      = /bin/sh
 
-SRCS	      = mathlib.c \
-		stripcalc.c \
-		stripsubs.c
+TARGETS	   =	stripcalc msctl msctl2 linestub cheby bpf helical_c helical_s helical_filter interdig
 
-all:		$(PROGRAM)
+all:		$(TARGETS)
 
-$(PROGRAM):     $(OBJS) $(LIBS)
-		@echo "Linking $(PROGRAM) ..."
-		$(LD) -o $(PROGRAM) $(LDFLAGS) $(OBJS) $(LIBS) -lp2c -lc -lm 
-		@echo "done"
+stripcalc :     stripcalc.c stripsubs.o mathlib.o
+		cc $(CFLAGS) -o stripcalc stripcalc.c stripsubs.o mathlib.o $(LDFLAGS) -lp2c -lc -lm 
 
-msctl:		msctl.o mathlib.o
-		cc -o msctl msctl.o mathlib.o $(LDFLAGS) -lp2c -lc -lm
+msctl2:	msctl2.c mathlib.o
+	cc $(CFLAGS) -o msctl2 msctl2.c mathlib.o -lm
 
-clean:;		@rm -f $(OBJS) core
+msctl:	msctl.c mathlib.o
+	cc $(CFLAGS) -o msctl msctl.c mathlib.o -lm
 
-clobber:;	@rm -f $(OBJS) $(PROGRAM) core tags
+interdig:	interdig.c mathlib.o
+	cc $(CFLAGS) -o interdig interdig.c mathlib.o -lm
 
-depend:;	@mkmf -f $(MAKEFILE) ROOT=$(ROOT)
-
-echo:;		@echo $(HDRS) $(SRCS)
-
-index:;		@ctags -wx $(HDRS) $(SRCS)
-
-install:	$(PROGRAM)
-		@echo Installing $(PROGRAM) in $(DEST)
-		@-strip $(PROGRAM)
-		@if [ $(DEST) != . ]; then \
-		(rm -f $(DEST)/$(PROGRAM); $(INSTALL) -f $(DEST) $(PROGRAM)); fi
-
-print:;		@$(PRINT) $(HDRS) $(SRCS)
-
-tags:           $(HDRS) $(SRCS); @ctags $(HDRS) $(SRCS)
-
-update:		$(DEST)/$(PROGRAM)
-
-$(PROGRAM): $(SRCS) $(LIBS) $(HDRS) $(EXTHDRS)
-		@$(MAKE) -f $(MAKEFILE) ROOT=$(ROOT) DEST=$(DEST) install
-
-
-msctl2:	msctl2.c
-	cc -O -I/usr/local/include -o msctl2 msctl2.c mathlib.o -lm
-
-msctl:	msctl.c
-	cc -O -I/usr/local/include -o msctl msctl.c mathlib.o -lm
-
-
-linestub: linestub.c
-	cc -O -I/usr/local/include -o linestub linestub.c mathlib.o -lm
+linestub: linestub.c mathlib.o
+	cc $(CFLAGS) -o linestub linestub.c mathlib.o -lm
 
 cheby: cheby.c mathlib.o
-	cc -O -I/usr/local/include -o cheby cheby.c mathlib.o -lm
+	cc $(CFLAGS) -o cheby cheby.c mathlib.o -lm
 
 bpf: bpf.c mathlib.o
-	cc -g -I/usr/local/include -o bpf bpf.c mathlib.o -lm
+	cc $(CFLAGS) -o bpf bpf.c mathlib.o -lm
+
+srbpf: srbpf.c mathlib.o
+	cc $(CFLAGS) -o srbpf srbpf.c mathlib.o -lm
 
 helical_c: helical_c.c
-	cc  -o helical_c helical_c.c -lm
+	cc  $(CFLAGS) -o helical_c helical_c.c -lm
 
 helical_s: helical_s.c
-	cc  -o helical_s helical_s.c -lm
+	cc  $(CFLAGS) -o helical_s helical_s.c -lm
 
 helical_filter: helical_filter.c
-	cc  -Ae -g -o helical_filter helical_filter.c -lm
+	cc  $(CFLAGS) -o helical_filter helical_filter.c -lm
+
+tags:;		@etags *.c *.h
+
+clean:;		@rm -f *.o core *~ \#*
+
+clobber:;	@rm -f *.o *~ \#* core tags $(TARGETS)
 
 ###
 mathlib.o: mathlib.h
