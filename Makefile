@@ -83,6 +83,15 @@ cheby: cheby.c mathlib.o
 bpf: bpf.c mathlib.o
 	cc -g -I/usr/local/include -o bpf bpf.c mathlib.o -lm
 
+helical_c: helical_c.c
+	cc  -o helical_c helical_c.c -lm
+
+helical_s: helical_s.c
+	cc  -o helical_s helical_s.c -lm
+
+helical_filter: helical_filter.c
+	cc  -Ae -g -o helical_filter helical_filter.c -lm
+
 ###
 mathlib.o: mathlib.h
 stripcalc.o: mathlib.h stripsubs.h
