@@ -124,13 +124,13 @@ int main(int argc, char **argv)
    Qd = (q1/2) * Qfilt;
    RbZo= M_PI_4 * ( 1/Qd - 1/Qu );
    theta=asin(sqrt(RbZo * 50/(2*Zo)));
-   tapin=N*theta/90;
+   tapin=N*theta/M_PI_2;
 
    /*Output tap calc*/
    Qd = (qn/2) * Qfilt;
    RbZo= M_PI_4 * ( 1/Qd - 1/Qu );
    theta=asin(sqrt(RbZo * 50/(2*Zo)));
-   tapout=N*theta/90;
+   tapout=N*theta/M_PI_2;
 
    /* Coupling h/d calculation */
    for (j=1; j<sect; j++) {
