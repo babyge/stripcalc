@@ -52,7 +52,7 @@ char *argv[];
 
 {
    int k,n;
-   double h, w, fl, fh, g[50], f0, Z[50], ZprimeS[50];
+   double h, w, fl, fh, g[50], Z[50], ZprimeS[50];
    double Zo, theta, Zstub[50];    
    double Yo, YstbN, Ystb, YlinN, Ylin;
    char prompt[80];
@@ -75,7 +75,7 @@ char *argv[];
       if (Zo == 0) exit(0);
 
       Yo=1/Zo;
-      f0=(fl+fh)/2;
+      //f0=(fl+fh)/2;
       w = 2*(fh-fl)/(fh+fl);
       theta = M_PI_2*(1-(w/2));
       h = g[1]*g[1]*tan(theta)*tan(theta);

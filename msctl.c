@@ -54,6 +54,7 @@ double (*func)();	/* ANSI: double (*func)(double); */
 		if (fabs(dx) < xacc || fmid == 0.0) return rtb;
 	}
 	fprintf(stderr,"Too many bisections in RTBIS\n");
+        return(NAN);
 }
 
 #undef JMAX

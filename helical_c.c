@@ -44,9 +44,10 @@ int guage(double g)
    for (j=40; j>=0; j--) {
       if ( g < wire_guage[j] ) return(j+1);
    }
+   return(-1);
 }
 
-main(int argc, char **argv) 
+int main(int argc, char **argv) 
 {
    double S,Q,F,Turns,Pitch,Zed,D,D_,H,G,Er,Df;
    char yn[255];
@@ -90,4 +91,5 @@ main(int argc, char **argv)
 	 Q=1/(1/Q + Df);
 	 goto REPRINT;
    }
+   exit(0);
 }

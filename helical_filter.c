@@ -48,6 +48,7 @@ int guage(double g)
    for (j=40; j>=0; j--) {
       if ( g < wire_guage[j] ) return(j+1);
    }
+   return(-1);
 }
 
 int main(int argc, char **argv)

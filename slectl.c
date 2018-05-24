@@ -75,13 +75,13 @@ char *argv[];
       coupling=10*log((Zoe-Zoo)/(Zoe+Zoo));
       
       fprintf(stdout, "Zoo = %g ohms, Zoe = %g ohms\n",Zoo,Zoe);
+      fprintf(stdout, "Zdiff = %.5g, Zcm = %.5g\n",2*Zoo,Zoe/2);
       fprintf(stdout, "Zo = %g ohms, Coupling = %g dB\n",Zo,coupling);
       
       R3=(2*Zoe*Zoo)/(Zoe-Zoo);
       fprintf(stdout, "Terminate with 2 %g ohm r's to gnd, and 1 %g ohm resistor from line to line\n",Zoe,R3);
       fprintf(stdout, "\n");
 
-      fprintf(stdout, "Zdiff = %g ohms\n", 2*Zoo);
 
    } while(1);
 }

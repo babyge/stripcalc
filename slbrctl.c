@@ -60,6 +60,7 @@ double (*func)();	/* ANSI: double (*func)(double); */
 		if (fabs(dx) < xacc || fmid == 0.0) return rtb;
 	}
 	fprintf(stderr,"Too many bisections in RTBIS\n");
+        return(NAN);
 }
 
 #undef JMAX
@@ -81,7 +82,7 @@ double findk(k)
 
 
 
-main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 {
@@ -105,12 +106,15 @@ char *argv[];
       coupling=10*log((Zoe-Zoo)/(Zoe+Zoo));
       
       fprintf(stdout, "Zoo = %g ohms, Zoe = %g ohms\n",Zoo,Zoe);
+      fprintf(stdout, "Zdiff = %.5g, Zcm = %.5g\n",2*Zoo,Zoe/2);
+
       fprintf(stdout, "Zo = %g ohms, Coupling = %g dB\n",Zo,coupling);
       
       R3=(2*Zoe*Zoo)/(Zoe-Zoo);
       fprintf(stdout, "Terminate with 2 %g ohm r's to gnd, and 1 %g ohm resistor from line to line\n",Zoe,R3);
       fprintf(stdout, "\n");
    } while(1);
+   exit(0);
  }
 
 

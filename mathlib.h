@@ -17,8 +17,11 @@ $Header$
 # define extern extern
 #endif
 
-/*elliptic integral of the first kind*/
+/*complete elliptic integral of the first kind*/
 #define ELIP1(k) gsl_sf_ellint_Kcomp((k),GSL_PREC_DOUBLE)
+
+/*complementary complete elliptic integral of the first kind */
+#define ELIP1_prime(k)  gsl_sf_ellint_Kcomp(sqrt(1-((k)*(k))),GSL_PREC_DOUBLE)
 
 /*elliptic integral of the second kind*/
 #define ELIP2(k) gsl_sf_ellint_Ecomp((k),GSL_PREC_DOUBLE)
