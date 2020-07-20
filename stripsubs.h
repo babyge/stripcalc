@@ -67,19 +67,19 @@ typedef double output_vector[5];
 #endif
 
 
-linetype current_line_type;
-double w, d1, d2, d, Zo, height, Er, gw, Eeff, f, b, t;
-char Ans[133];
-unsigned char Finite_calc, OK;
-char Letter_selection;
-calctype calculation;
-int target_parameter;
-double target_value;
-int variable_parameter;
-input_vector dim_vector;
-output_vector result_vector;
-unsigned char loop, debug_mode;
-int Calc_error;
+GLOBAL linetype current_line_type;
+GLOBAL double w, d1, d2, d, Zo, height, Er, gw, Eeff, f, b, t;
+GLOBAL char Ans[133];
+GLOBAL unsigned char Finite_calc, OK;
+GLOBAL char Letter_selection;
+GLOBAL calctype calculation;
+GLOBAL int target_parameter;
+GLOBAL double target_value;
+GLOBAL int variable_parameter;
+GLOBAL input_vector dim_vector;
+GLOBAL output_vector result_vector;
+GLOBAL unsigned char loop, debug_mode;
+GLOBAL int Calc_error;
 
 
 #undef GLOBAL
