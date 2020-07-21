@@ -29,9 +29,9 @@ Add header and log keywords to all files
 #include "mathlib.h"
 #endif
 
-
+#include "stripsubs.h"
 double Zoo,Zoe,Z0,c,whso,whse,P,er,r,H,F,G;
-double w,wh,sh,eeff,ht;
+double wh,sh,eeff,ht;
 
 #include "get_input.h"
 
